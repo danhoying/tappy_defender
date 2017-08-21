@@ -17,6 +17,10 @@ public class PlayerShip {
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ship);
     }
 
+    public void update() {
+        x++;
+    }
+
     public Bitmap getBitmap() {
         return bitmap;
     }
