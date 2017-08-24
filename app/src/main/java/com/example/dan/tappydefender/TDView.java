@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.ArrayList;
+
 public class TDView extends SurfaceView implements Runnable {
 
     volatile boolean playing;
@@ -17,6 +19,7 @@ public class TDView extends SurfaceView implements Runnable {
     public EnemyShip enemy1;
     public EnemyShip enemy2;
     public EnemyShip enemy3;
+    public ArrayList<SpaceDust> dustList = new ArrayList<>();
 
     private Paint paint;
     private Canvas canvas;
@@ -26,10 +29,18 @@ public class TDView extends SurfaceView implements Runnable {
         super(context);
         ourHolder = getHolder();
         paint = new Paint();
+
         player = new PlayerShip(context, x, y);
         enemy1 = new EnemyShip(context, x, y);
         enemy2 = new EnemyShip(context, x, y);
         enemy3 = new EnemyShip(context, x, y);
+
+        // Create SpaceDust specs and add to list
+        int numSpecs = 40;
+        for (int i = 0; i < numSpecs; i++) {
+            SpaceDust spec = new SpaceDust(x, y);
+            dustList.add(spec);
+        }
     }
 
     private void update() {
@@ -37,6 +48,10 @@ public class TDView extends SurfaceView implements Runnable {
         enemy1.update(player.getSpeed());
         enemy2.update(player.getSpeed());
         enemy3.update(player.getSpeed());
+
+        for (SpaceDust sd : dustList) {
+            sd.update(player.getSpeed());
+        }
     }
 
     private void draw() {
@@ -46,6 +61,12 @@ public class TDView extends SurfaceView implements Runnable {
 
             // Clear the last frame
             canvas.drawColor(Color.argb(255, 0, 0, 0));
+
+            // Draw the space dust
+            paint.setColor(Color.argb(255, 255, 255, 255));
+            for (SpaceDust sd : dustList) {
+                canvas.drawPoint(sd.getX(), sd.getY(), paint);
+            }
 
             // Draw the player
             canvas.drawBitmap(player.getBitmap(), player.getX(), player.getY(), paint);
