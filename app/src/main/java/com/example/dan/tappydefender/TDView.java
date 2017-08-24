@@ -17,11 +17,11 @@ public class TDView extends SurfaceView implements Runnable {
     private Canvas canvas;
     private SurfaceHolder ourHolder;
 
-    public TDView(Context context) {
+    public TDView(Context context, int x, int y) {
         super(context);
         ourHolder = getHolder();
         paint = new Paint();
-        player = new PlayerShip(context);
+        player = new PlayerShip(context, x, y);
     }
 
     private void update() {
