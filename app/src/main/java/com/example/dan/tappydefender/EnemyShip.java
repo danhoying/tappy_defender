@@ -9,7 +9,8 @@ import java.util.Random;
 
 public class EnemyShip {
     private Bitmap bitmap;
-    private int x, y;
+    private int x;
+    private int y;
     private int speed = 1;
 
     // Detect enemies leaving the screen
@@ -43,6 +44,10 @@ public class EnemyShip {
 
     public int getX() {
         return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
     }
 
     public int getY() {

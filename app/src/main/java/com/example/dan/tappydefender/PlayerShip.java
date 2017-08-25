@@ -30,9 +30,9 @@ public class PlayerShip {
         speed = 1;
         boosting = false;
 
+        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ship);
         maxY = screenY - bitmap.getHeight();
         minY = 0;
-        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ship);
         hitBox = new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
     }
 

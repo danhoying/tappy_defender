@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -44,6 +45,21 @@ public class TDView extends SurfaceView implements Runnable {
     }
 
     private void update() {
+        /* Collision detection on current positions before position is updated and redrawn. Images
+        are moved an additional number of pixels left equal to the image horizontal size */
+        int offscreenPosition = enemy1.getBitmap().getWidth() * -1;
+        if (Rect.intersects(player.getHitbox(), enemy1.getHitbox())) {
+            enemy1.setX(offscreenPosition);
+        }
+
+        if (Rect.intersects(player.getHitbox(), enemy2.getHitbox())) {
+            enemy2.setX(offscreenPosition);
+        }
+
+        if (Rect.intersects(player.getHitbox(), enemy3.getHitbox())) {
+            enemy3.setX(offscreenPosition);
+        }
+
         player.update();
         enemy1.update(player.getSpeed());
         enemy2.update(player.getSpeed());
@@ -61,6 +77,25 @@ public class TDView extends SurfaceView implements Runnable {
 
             // Clear the last frame
             canvas.drawColor(Color.argb(255, 0, 0, 0));
+
+            // For debugging. Switch to white pixels and draw hit boxes
+//            paint.setColor(Color.argb(255, 255, 255, 255));
+//            canvas.drawRect(player.getHitbox().left,
+//                    player.getHitbox().top,
+//                    player.getHitbox().right,
+//                    player.getHitbox().bottom, paint);
+//            canvas.drawRect(enemy1.getHitbox().left,
+//                    enemy1.getHitbox().top,
+//                    enemy1.getHitbox().right,
+//                    enemy1.getHitbox().bottom, paint);
+//            canvas.drawRect(enemy2.getHitbox().left,
+//                    enemy2.getHitbox().top,
+//                    enemy2.getHitbox().right,
+//                    enemy2.getHitbox().bottom, paint);
+//            canvas.drawRect(enemy3.getHitbox().left,
+//                    enemy3.getHitbox().top,
+//                    enemy3.getHitbox().right,
+//                    enemy3.getHitbox().bottom, paint);
 
             // Draw the space dust
             paint.setColor(Color.argb(255, 255, 255, 255));
