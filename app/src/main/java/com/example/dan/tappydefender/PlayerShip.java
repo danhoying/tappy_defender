@@ -3,10 +3,12 @@ package com.example.dan.tappydefender;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 public class PlayerShip {
 
     private final int GRAVITY = -12;
+
     // Limit the bounds of the ship's speed
     private final int MIN_SPEED = 1;
     private final int MAX_SPEED = 20;
@@ -14,18 +16,52 @@ public class PlayerShip {
     private int x, y;
     private int speed = 0;
     private boolean boosting;
+
     // Stop ship from leaving the screen
     private int maxY;
     private int minY;
+
+    // A hit box for collision detection
+    private Rect hitBox;
 
     public PlayerShip(Context context, int screenX, int screenY) {
         x = 50;
         y = 50;
         speed = 1;
-        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ship);
         boosting = false;
+
         maxY = screenY - bitmap.getHeight();
         minY = 0;
+        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ship);
+        hitBox = new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public Rect getHitbox(){
+        return hitBox;
+    }
+
+    public void setBoosting() {
+        boosting = true;
+    }
+
+    public void stopBoosting() {
+        boosting = false;
     }
 
     public void update() {
@@ -58,29 +94,11 @@ public class PlayerShip {
         if (y > maxY) {
             y = maxY;
         }
-    }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getSpeed() {
-        return speed;
-    }
-
-    public void setBoosting() {
-        boosting = true;
-    }
-
-    public void stopBoosting() {
-        boosting = false;
+        // Refresh hit box location
+        hitBox.left = x;
+        hitBox.top = y;
+        hitBox.right = x + bitmap.getWidth();
+        hitBox.bottom = y + bitmap.getHeight();
     }
 }
