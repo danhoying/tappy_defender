@@ -24,11 +24,14 @@ public class PlayerShip {
     // A hit box for collision detection
     private Rect hitBox;
 
+    private int shieldStrength;
+
     public PlayerShip(Context context, int screenX, int screenY) {
         x = 50;
         y = 50;
         speed = 1;
         boosting = false;
+        shieldStrength = 2;
 
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ship);
         maxY = screenY - bitmap.getHeight();
@@ -54,6 +57,10 @@ public class PlayerShip {
 
     public Rect getHitbox(){
         return hitBox;
+    }
+
+    public int getShieldStrength() {
+        return shieldStrength;
     }
 
     public void setBoosting() {
@@ -100,5 +107,9 @@ public class PlayerShip {
         hitBox.top = y;
         hitBox.right = x + bitmap.getWidth();
         hitBox.bottom = y + bitmap.getHeight();
+    }
+
+    public void reduceShieldStrength() {
+        shieldStrength --;
     }
 }

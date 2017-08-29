@@ -13,6 +13,8 @@ import java.util.ArrayList;
 
 public class TDView extends SurfaceView implements Runnable {
 
+    private Context context;
+
     volatile boolean playing;
     Thread gameThread = null;
 
@@ -21,6 +23,9 @@ public class TDView extends SurfaceView implements Runnable {
     public EnemyShip enemy2;
     public EnemyShip enemy3;
     public ArrayList<SpaceDust> dustList = new ArrayList<>();
+
+    private int screenX;
+    private int screenY;
 
     private Paint paint;
     private Canvas canvas;
@@ -33,20 +38,35 @@ public class TDView extends SurfaceView implements Runnable {
 
     public TDView(Context context, int x, int y) {
         super(context);
+        this.context = context;
+
+        screenX = x;
+        screenY = y;
+
         ourHolder = getHolder();
         paint = new Paint();
 
-        player = new PlayerShip(context, x, y);
-        enemy1 = new EnemyShip(context, x, y);
-        enemy2 = new EnemyShip(context, x, y);
-        enemy3 = new EnemyShip(context, x, y);
+        startGame();
+    }
+
+    private void startGame() {
+        // Initialize game objects
+        player = new PlayerShip(context, screenX, screenY);
+        enemy1 = new EnemyShip(context, screenX, screenY);
 
         // Create SpaceDust specs and add to list
         int numSpecs = 40;
         for (int i = 0; i < numSpecs; i++) {
-            SpaceDust spec = new SpaceDust(x, y);
+            SpaceDust spec = new SpaceDust(screenX, screenY);
             dustList.add(spec);
         }
+
+        // Reset time and distance
+        distanceRemaining = 10000; // 10 km
+        timeTaken = 0;
+
+        // Get start time
+        timeStarted = System.currentTimeMillis();
     }
 
     private void update() {
@@ -119,9 +139,9 @@ public class TDView extends SurfaceView implements Runnable {
             // Draw the HUD
             paint.setTextAlign(Paint.Align.LEFT);
             paint.setColor(Color.argb(255, 255, 255, 255));
-            paint.setTextSize(25);
-            canvas.drawText("Fastest: " + fastestTime + "s", 10, 20, paint);
-            canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 20, paint);
+            paint.setTextSize(50);
+            canvas.drawText("Fastest: " + fastestTime + "s", 10, 45, paint);
+            canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 45, paint);
             canvas.drawText("Distance: " + distanceRemaining / 1000 + " KM",
                     screenX / 3, screenY - 20, paint);
             canvas.drawText("Shield: " + player.getShieldStrength(), 10, screenY - 20, paint);
