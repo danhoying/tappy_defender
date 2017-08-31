@@ -54,6 +54,8 @@ public class TDView extends SurfaceView implements Runnable {
         // Initialize game objects
         player = new PlayerShip(context, screenX, screenY);
         enemy1 = new EnemyShip(context, screenX, screenY);
+        enemy2 = new EnemyShip(context, screenX, screenY);
+        enemy3 = new EnemyShip(context, screenX, screenY);
 
         // Create SpaceDust specs and add to list
         int numSpecs = 40;
@@ -139,7 +141,14 @@ public class TDView extends SurfaceView implements Runnable {
             // Clear the last frame
             canvas.drawColor(Color.argb(255, 0, 0, 0));
 
-            // For debugging. Switch to white pixels and draw hit boxes
+            if (!gameEnded) {
+                // Draw the space dust
+                paint.setColor(Color.argb(255, 255, 255, 255));
+                for (SpaceDust sd : dustList) {
+                    canvas.drawPoint(sd.getX(), sd.getY(), paint);
+                }
+
+                // For debugging. Switch to white pixels and draw hit boxes
 //            paint.setColor(Color.argb(255, 255, 255, 255));
 //            canvas.drawRect(player.getHitbox().left,
 //                    player.getHitbox().top,
@@ -158,22 +167,15 @@ public class TDView extends SurfaceView implements Runnable {
 //                    enemy3.getHitbox().right,
 //                    enemy3.getHitbox().bottom, paint);
 
-            // Draw the space dust
-            paint.setColor(Color.argb(255, 255, 255, 255));
-            for (SpaceDust sd : dustList) {
-                canvas.drawPoint(sd.getX(), sd.getY(), paint);
-            }
+                // Draw the player
+                canvas.drawBitmap(player.getBitmap(), player.getX(), player.getY(), paint);
 
-            // Draw the player
-            canvas.drawBitmap(player.getBitmap(), player.getX(), player.getY(), paint);
+                // Draw the enemies
+                canvas.drawBitmap(enemy1.getBitmap(), enemy1.getX(), enemy1.getY(), paint);
+                canvas.drawBitmap(enemy2.getBitmap(), enemy2.getX(), enemy2.getY(), paint);
+                canvas.drawBitmap(enemy3.getBitmap(), enemy3.getX(), enemy3.getY(), paint);
 
-            // Draw the enemies
-            canvas.drawBitmap(enemy1.getBitmap(), enemy1.getX(), enemy1.getY(), paint);
-            canvas.drawBitmap(enemy2.getBitmap(), enemy2.getX(), enemy2.getY(), paint);
-            canvas.drawBitmap(enemy3.getBitmap(), enemy3.getX(), enemy3.getY(), paint);
-
-            // Draw the HUD
-            if (!gameEnded) {
+                // Draw the HUD
                 paint.setTextAlign(Paint.Align.LEFT);
                 paint.setColor(Color.argb(255, 255, 255, 255));
                 paint.setTextSize(50);
@@ -184,24 +186,24 @@ public class TDView extends SurfaceView implements Runnable {
                 canvas.drawText("Shield: " + player.getShieldStrength(), 10, screenY - 20, paint);
                 canvas.drawText("Speed: " + player.getSpeed() * 60 + " MPS",
                         (screenX / 3) * 2, screenY - 20, paint);
-
-                // Unlock and draw the scene
-                ourHolder.unlockCanvasAndPost(canvas);
             } else {
                // Show game over screen
-                paint.setTextSize(80);
+                paint.setTextSize(180);
                 paint.setTextAlign(Paint.Align.CENTER);
                 canvas.drawText("Game Over", screenX / 2, 100, paint);
-                paint.setTextSize(25);
+                paint.setTextSize(100);
                 canvas.drawText("Fastest: " + fastestTime + "s", screenX / 2, 160, paint);
 
                 canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 200, paint);
 
-                canvas.drawText("Distance remaining:" +
+                canvas.drawText("Distance remaining: " +
                         distanceRemaining / 1000 + " KM",screenX / 2, 240, paint);
                 paint.setTextSize(80);
                 canvas.drawText("Tap to replay!", screenX / 2, 350, paint);
             }
+
+            // Unlock and draw the scene
+            ourHolder.unlockCanvasAndPost(canvas);
         }
     }
 
@@ -230,6 +232,10 @@ public class TDView extends SurfaceView implements Runnable {
                 break;
             case MotionEvent.ACTION_DOWN:
                 player.setBoosting();
+                // If on game over screen, screen touch starts a new game
+                if (gameEnded) {
+                    startGame();
+                }
                 break;
         }
         return true;
