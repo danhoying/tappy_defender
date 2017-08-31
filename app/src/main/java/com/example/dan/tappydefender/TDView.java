@@ -16,6 +16,7 @@ public class TDView extends SurfaceView implements Runnable {
     private Context context;
 
     volatile boolean playing;
+    private boolean gameEnded;
     Thread gameThread = null;
 
     private PlayerShip player;
@@ -67,6 +68,8 @@ public class TDView extends SurfaceView implements Runnable {
 
         // Get start time
         timeStarted = System.currentTimeMillis();
+
+        gameEnded = false;
     }
 
     private void update() {
@@ -92,7 +95,7 @@ public class TDView extends SurfaceView implements Runnable {
         if (hitDetected) {
             player.reduceShieldStrength();
             if (player.getShieldStrength() < 0) {
-                // Game over, do something
+                gameEnded = true;
             }
         }
 
@@ -103,6 +106,28 @@ public class TDView extends SurfaceView implements Runnable {
 
         for (SpaceDust sd : dustList) {
             sd.update(player.getSpeed());
+        }
+
+        if (!gameEnded) {
+            // Subtract distance to home based on current speed
+            distanceRemaining -= player.getSpeed();
+
+            // Keep track of how long the player has been flying
+            timeTaken = System.currentTimeMillis() - timeStarted;
+        }
+
+        // Completed the game
+        if (distanceRemaining < 0) {
+            // Check for new fastest time
+            if (timeTaken < fastestTime) {
+                fastestTime = timeTaken;
+            }
+
+            // Avoid negative numbers in HUD
+            distanceRemaining = 0;
+
+            // End the game
+            gameEnded = true;
         }
     }
 
@@ -148,19 +173,35 @@ public class TDView extends SurfaceView implements Runnable {
             canvas.drawBitmap(enemy3.getBitmap(), enemy3.getX(), enemy3.getY(), paint);
 
             // Draw the HUD
-            paint.setTextAlign(Paint.Align.LEFT);
-            paint.setColor(Color.argb(255, 255, 255, 255));
-            paint.setTextSize(50);
-            canvas.drawText("Fastest: " + fastestTime + "s", 10, 45, paint);
-            canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 45, paint);
-            canvas.drawText("Distance: " + distanceRemaining / 1000 + " KM",
-                    screenX / 3, screenY - 20, paint);
-            canvas.drawText("Shield: " + player.getShieldStrength(), 10, screenY - 20, paint);
-            canvas.drawText("Speed: " + player.getSpeed() * 60 + " MPS",
-                    (screenX / 3) * 2, screenY - 20, paint);
+            if (!gameEnded) {
+                paint.setTextAlign(Paint.Align.LEFT);
+                paint.setColor(Color.argb(255, 255, 255, 255));
+                paint.setTextSize(50);
+                canvas.drawText("Fastest: " + fastestTime + "s", 10, 45, paint);
+                canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 45, paint);
+                canvas.drawText("Distance: " + distanceRemaining / 1000 + " KM",
+                        screenX / 3, screenY - 20, paint);
+                canvas.drawText("Shield: " + player.getShieldStrength(), 10, screenY - 20, paint);
+                canvas.drawText("Speed: " + player.getSpeed() * 60 + " MPS",
+                        (screenX / 3) * 2, screenY - 20, paint);
 
-            // Unlock and draw the scene
-            ourHolder.unlockCanvasAndPost(canvas);
+                // Unlock and draw the scene
+                ourHolder.unlockCanvasAndPost(canvas);
+            } else {
+               // Show game over screen
+                paint.setTextSize(80);
+                paint.setTextAlign(Paint.Align.CENTER);
+                canvas.drawText("Game Over", screenX / 2, 100, paint);
+                paint.setTextSize(25);
+                canvas.drawText("Fastest: " + fastestTime + "s", screenX / 2, 160, paint);
+
+                canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 200, paint);
+
+                canvas.drawText("Distance remaining:" +
+                        distanceRemaining / 1000 + " KM",screenX / 2, 240, paint);
+                paint.setTextSize(80);
+                canvas.drawText("Tap to replay!", screenX / 2, 350, paint);
+            }
         }
     }
 
