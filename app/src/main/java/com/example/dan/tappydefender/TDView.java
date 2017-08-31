@@ -72,17 +72,28 @@ public class TDView extends SurfaceView implements Runnable {
     private void update() {
         /* Collision detection on current positions before position is updated and redrawn. Images
         are moved an additional number of pixels left equal to the image horizontal size */
+        boolean hitDetected = false;
         int offscreenPosition = enemy1.getBitmap().getWidth() * -1;
         if (Rect.intersects(player.getHitbox(), enemy1.getHitbox())) {
+            hitDetected = true;
             enemy1.setX(offscreenPosition);
         }
 
         if (Rect.intersects(player.getHitbox(), enemy2.getHitbox())) {
+            hitDetected = true;
             enemy2.setX(offscreenPosition);
         }
 
         if (Rect.intersects(player.getHitbox(), enemy3.getHitbox())) {
+            hitDetected = true;
             enemy3.setX(offscreenPosition);
+        }
+
+        if (hitDetected) {
+            player.reduceShieldStrength();
+            if (player.getShieldStrength() < 0) {
+                // Game over, do something
+            }
         }
 
         player.update();
