@@ -19,22 +19,27 @@ import java.util.ArrayList;
 
 public class TDView extends SurfaceView implements Runnable {
 
+    private Context context;
+
+    private PlayerShip player;
     public EnemyShip enemy1;
     public EnemyShip enemy2;
     public EnemyShip enemy3;
     public ArrayList<SpaceDust> dustList = new ArrayList<>();
+
     volatile boolean playing;
+    private boolean gameEnded;
     Thread gameThread = null;
+
+    private SoundPool soundPool;
     int start = -1;
     int bump = -1;
     int destroyed = -1;
     int win = -1;
-    private Context context;
-    private boolean gameEnded;
-    private PlayerShip player;
+
     private int screenX;
     private int screenY;
-    private SoundPool soundPool;
+
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder ourHolder;
@@ -53,7 +58,7 @@ public class TDView extends SurfaceView implements Runnable {
             AssetManager assetManager = context.getAssets();
             AssetFileDescriptor descriptor;
 
-            descriptor = assetManager.openFd("start.ogg")
+            descriptor = assetManager.openFd("start.ogg");
             start = soundPool.load(descriptor, 0);
 
             descriptor = assetManager.openFd("win.ogg");
@@ -67,22 +72,15 @@ public class TDView extends SurfaceView implements Runnable {
         } catch (IOException e) {
             Log.e("error", "failed to load sound files");
         }
+
+        screenX = x;
+        screenY = y;
+
+        ourHolder = getHolder();
+
+        paint = new Paint();
+        startGame();
     }
-
-    screenX =x;
-    screenY =y;
-
-    ourHolder =
-
-    getHolder();
-
-    paint =new
-
-    Paint();
-
-    startGame();
-
-}
 
     private void startGame() {
         // Initialize game objects
