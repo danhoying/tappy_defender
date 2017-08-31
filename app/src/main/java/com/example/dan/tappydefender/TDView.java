@@ -1,33 +1,40 @@
 package com.example.dan.tappydefender;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class TDView extends SurfaceView implements Runnable {
 
-    private Context context;
-
-    volatile boolean playing;
-    private boolean gameEnded;
-    Thread gameThread = null;
-
-    private PlayerShip player;
     public EnemyShip enemy1;
     public EnemyShip enemy2;
     public EnemyShip enemy3;
     public ArrayList<SpaceDust> dustList = new ArrayList<>();
-
+    volatile boolean playing;
+    Thread gameThread = null;
+    int start = -1;
+    int bump = -1;
+    int destroyed = -1;
+    int win = -1;
+    private Context context;
+    private boolean gameEnded;
+    private PlayerShip player;
     private int screenX;
     private int screenY;
-
+    private SoundPool soundPool;
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder ourHolder;
@@ -37,18 +44,45 @@ public class TDView extends SurfaceView implements Runnable {
     private long timeStarted;
     private long fastestTime;
 
-    public TDView(Context context, int x, int y) {
+    public TDView(final Context context, int x, int y) {
         super(context);
         this.context = context;
 
-        screenX = x;
-        screenY = y;
+        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        try {
+            AssetManager assetManager = context.getAssets();
+            AssetFileDescriptor descriptor;
 
-        ourHolder = getHolder();
-        paint = new Paint();
+            descriptor = assetManager.openFd("start.ogg")
+            start = soundPool.load(descriptor, 0);
 
-        startGame();
+            descriptor = assetManager.openFd("win.ogg");
+            win = soundPool.load(descriptor, 0);
+
+            descriptor = assetManager.openFd("bump.ogg");
+            bump = soundPool.load(descriptor, 0);
+
+            descriptor = assetManager.openFd("destroyed.ogg");
+            destroyed = soundPool.load(descriptor, 0);
+        } catch (IOException e) {
+            Log.e("error", "failed to load sound files");
+        }
     }
+
+    screenX =x;
+    screenY =y;
+
+    ourHolder =
+
+    getHolder();
+
+    paint =new
+
+    Paint();
+
+    startGame();
+
+}
 
     private void startGame() {
         // Initialize game objects
@@ -72,6 +106,8 @@ public class TDView extends SurfaceView implements Runnable {
         timeStarted = System.currentTimeMillis();
 
         gameEnded = false;
+
+        soundPool.play(start, 1, 1, 0, 0, 1);
     }
 
     private void update() {
@@ -95,8 +131,10 @@ public class TDView extends SurfaceView implements Runnable {
         }
 
         if (hitDetected) {
+            soundPool.play(bump, 1, 1, 0, 0, 1);
             player.reduceShieldStrength();
             if (player.getShieldStrength() < 0) {
+                soundPool.play(destroyed, 1, 1, 0, 0, 1);
                 gameEnded = true;
             }
         }
@@ -120,6 +158,7 @@ public class TDView extends SurfaceView implements Runnable {
 
         // Completed the game
         if (distanceRemaining < 0) {
+            soundPool.play(win, 1, 1, 0, 0, 1);
             // Check for new fastest time
             if (timeTaken < fastestTime) {
                 fastestTime = timeTaken;
@@ -187,7 +226,7 @@ public class TDView extends SurfaceView implements Runnable {
                 canvas.drawText("Speed: " + player.getSpeed() * 60 + " MPS",
                         (screenX / 3) * 2, screenY - 20, paint);
             } else {
-               // Show game over screen
+                // Show game over screen
                 paint.setTextSize(180);
                 paint.setTextAlign(Paint.Align.CENTER);
                 canvas.drawText("Game Over", screenX / 2, 100, paint);
@@ -197,7 +236,7 @@ public class TDView extends SurfaceView implements Runnable {
                 canvas.drawText("Time: " + timeTaken + "s", screenX / 2, 200, paint);
 
                 canvas.drawText("Distance remaining: " +
-                        distanceRemaining / 1000 + " KM",screenX / 2, 240, paint);
+                        distanceRemaining / 1000 + " KM", screenX / 2, 240, paint);
                 paint.setTextSize(80);
                 canvas.drawText("Tap to replay!", screenX / 2, 350, paint);
             }
