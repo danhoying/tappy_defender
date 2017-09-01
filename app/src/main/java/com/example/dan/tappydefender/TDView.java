@@ -1,6 +1,7 @@
 package com.example.dan.tappydefender;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
@@ -18,6 +19,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class TDView extends SurfaceView implements Runnable {
+
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
 
     private Context context;
 
@@ -52,6 +56,11 @@ public class TDView extends SurfaceView implements Runnable {
     public TDView(final Context context, int x, int y) {
         super(context);
         this.context = context;
+
+        // Get a reference to a file called HiScores
+        prefs = context.getSharedPreferences("HiScores", Context.MODE_PRIVATE);
+        // Load the fastest time from an entry in the file (default score: 1000000)
+        fastestTime = prefs.getLong("fastestTime", 1000000);
 
         soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
         try {
@@ -159,6 +168,10 @@ public class TDView extends SurfaceView implements Runnable {
             soundPool.play(win, 1, 1, 0, 0, 1);
             // Check for new fastest time
             if (timeTaken < fastestTime) {
+                // Save high score
+                editor = prefs.edit();
+                editor.putLong("fastestTime", timeTaken);
+                editor.apply();
                 fastestTime = timeTaken;
             }
 
